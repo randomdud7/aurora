@@ -47,11 +47,28 @@ jobs:
           cp packages/*.deb output/aurora-rootful.deb
           ls -la output/
 
-      - name: Build roothide package
+      - name: Build roothide (jbroot + arm64e) package
         continue-on-error: true
         run: |
-          DEB=$(ls packages/*.deb | head -n1)
-          bash scripts/make_roothide.sh "$DEB" output/aurora-roothide.deb
+          # Self-contained conversion (does NOT depend on scripts/ being updated):
+          # data paths move under jbroot/, Architecture flips to iphoneos-arm64e
+          set -euo pipefail
+          SRC=$(ls packages/*.deb | head -n1)
+          OUT=output/aurora-roothide.deb
+          WORK=$(mktemp -d)
+          trap 'rm -rf "$WORK"' EXIT
+          dpkg-deb -R "$SRC" "$WORK/root"
+          ( cd "$WORK/root" && mkdir -p jbroot \
+              && find . -mindepth 1 -maxdepth 1 ! -name DEBIAN ! -name jbroot \
+                 -exec mv {} jbroot/ \; )
+          sed -i \
+            -e 's#^Architecture: .*#Architecture: iphoneos-arm64e#' \
+            -e 's#^Description: \(.*\)$#Description: \1 (roothide build)#' \
+            "$WORK/root/DEBIAN/control"
+          mkdir -p output
+          dpkg-deb --root-owner-group -b "$WORK/root" "$OUT"
+          dpkg-deb -I "$OUT"
+          dpkg-deb -c "$OUT"
 
       - name: Build Sileo repo site
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
