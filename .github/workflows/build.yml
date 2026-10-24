@@ -92,6 +92,13 @@ jobs:
               echo " $(sha256sum "$f" | cut -d' ' -f1) $(stat -c%s "$f") $f"
             done
           } > Release
+          # Mirror metadata so EVERY suite style Sileo probes returns 200:
+          # "./" suite -> dists/Release + dists/main/..., flat repos -> root Packages*
+          cp dists/stable/Release dists/Release
+          cp -r dists/stable/main dists/main
+          cp dists/stable/main/binary-iphoneos-arm/Packages Packages
+          cp dists/stable/main/binary-iphoneos-arm/Packages.gz Packages.gz
+          cp dists/stable/main/binary-iphoneos-arm/Packages.bz2 Packages.bz2
           cd "$GITHUB_WORKSPACE"
           cat > site/index.html <<'HTML'
           <!doctype html>
