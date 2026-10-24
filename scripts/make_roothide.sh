@@ -3,30 +3,31 @@
 # Works with the standard roothide bootstrap, whose dpkg relocates every
 # path under jbroot/ at install time.
 #
-# Usage: ./scripts/make_roothide.sh <input.deb> <output.deb>
-set -euo pipefail
+# Usage: bash scripts/make_roothide.sh <input.deb> <output.deb>
+set -euxo pipefail
 
 SRC="${1:?usage: make_roothide.sh <input.deb> <output.deb>}"
 OUT="${2:?usage: make_roothide.sh <input.deb> <output.deb>}"
+
+echo "===== input deb info ====="
+dpkg-deb -I "$SRC"
+
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
-cd "$WORK"
-ar x "$SRC"
+# dpkg-deb understands every compression variant (gz / xz / zst) natively,
+# so no ar/tar gymnastics are needed.
+echo "===== extracting ====="
+dpkg-deb -R "$SRC" "$WORK/root"
 
-# stage data + control
-mkdir root/DEBIAN
-tar -xzf control.tar.gz -C root/DEBIAN
-for f in data.tar.*; do tar -xf "$f" -C root; done
-
-# relocate every data path under jbroot/
-cd root
+echo "===== relocating data under jbroot/ ====="
+cd "$WORK/root"
 mkdir -p jbroot
-for d in $(ls -A | grep -v -e '^DEBIAN$' -e '^jbroot$'); do
-  mv "$d" jbroot/
-done
-cd ..
+find . -mindepth 1 -maxdepth 1 ! -name DEBIAN ! -name jbroot -exec mv {} jbroot/ \;
 
-# keep control as-is (roothide's ellekit Provides: mobilesubstrate)
-dpkg-deb --root-owner-group -b root "$OUT"
+echo "===== repacking ====="
+dpkg-deb --root-owner-group -b "$WORK/root" "$OUT"
+
+echo "===== result ====="
+dpkg-deb -c "$OUT"
 echo "roothide deb written: $OUT"
