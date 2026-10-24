@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>Aurora</string>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Aurora — the lock screen, reimagined</string>
+			<key>footerText</key>
+			<string>Neon glow clock, aurora strip and grabber hiding. Changes apply live; respring if anything looks stuck.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Enable Aurora</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.aurora.lockscreen</string>
+			<key>PostNotification</key>
+			<string>com.aurora.lockscreen/prefs.changed</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Clock</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>label</key>
+			<string>Clock Hue (0-360)</string>
+			<key>key</key>
+			<string>clockHue</string>
+			<key>min</key>
+			<integer>0</integer>
+			<key>max</key>
+			<integer>360</integer>
+			<key>default</key>
+			<integer>190</integer>
+			<key>isContinuous</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.aurora.lockscreen</string>
+			<key>PostNotification</key>
+			<string>com.aurora.lockscreen/prefs.changed</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>label</key>
+			<string>Neon Glow (0-100)</string>
+			<key>key</key>
+			<string>glow</string>
+			<key>min</key>
+			<integer>0</integer>
+			<key>max</key>
+			<integer>100</integer>
+			<key>default</key>
+			<integer>90</integer>
+			<key>isContinuous</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.aurora.lockscreen</string>
+			<key>PostNotification</key>
+			<string>com.aurora.lockscreen/prefs.changed</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Grabber</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Hide Home Grabber</string>
+			<key>key</key>
+			<string>hideGrabber</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.aurora.lockscreen</string>
+			<key>PostNotification</key>
+			<string>com.aurora.lockscreen/prefs.changed</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Aurora Strip</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>label</key>
+			<string>Show Aurora Strip</string>
+			<key>key</key>
+			<string>stripEnabled</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.aurora.lockscreen</string>
+			<key>PostNotification</key>
+			<string>com.aurora.lockscreen/prefs.changed</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSEditTextCell</string>
+			<key>label</key>
+			<string>Strip Text</string>
+			<key>key</key>
+			<string>stripText</string>
+			<key>default</key>
+			<string>Aurora</string>
+			<key>defaults</key>
+			<string>com.aurora.lockscreen</string>
+			<key>PostNotification</key>
+			<string>com.aurora.lockscreen/prefs.changed</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>label</key>
+			<string>Strip Gradient Hue (0-360)</string>
+			<key>key</key>
+			<string>stripHue</string>
+			<key>min</key>
+			<integer>0</integer>
+			<key>max</key>
+			<integer>360</integer>
+			<key>default</key>
+			<integer>280</integer>
+			<key>isContinuous</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.aurora.lockscreen</string>
+			<key>PostNotification</key>
+			<string>com.aurora.lockscreen/prefs.changed</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Aurora 1.0.0 — built with Theos for the vphone iOS 27.0.1 jailbroken VM. Long live the scene.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Apply &amp; Respring</string>
+			<key>action</key>
+			<string>respring:</string>
+		</dict>
+	</array>
+</dict>
+</plist>

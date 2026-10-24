@@ -1,0 +1,9 @@
+Package: com.aurora.lockscreen
+Name: Aurora
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: The lock screen, reimagined. Neon-glow clock, aurora gradient strip, hide the home grabber. Old-school settings page inside the Settings app. Tuned for iOS 27 (vphone jailbroken VM), works on iOS 16+.
+Maintainer: Aurora Team
+Author: Aurora Team
+Section: Tweaks
+Depends: mobilesubstrate
