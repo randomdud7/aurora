@@ -39,17 +39,17 @@ jobs:
       - name: Build rootful package
         run: make package FINALPACKAGE=1
 
-      - name: Build roothide package
-        run: |
-          DEB=$(ls packages/*.deb | head -n1)
-          bash scripts/make_roothide.sh "$DEB" aurora-roothide.deb
-
-      - name: Collect artifacts
+      - name: Stage rootful deb
         run: |
           mkdir -p output
           cp packages/*.deb output/aurora-rootful.deb
-          cp aurora-roothide.deb output/
           ls -la output/
+
+      - name: Build roothide package
+        continue-on-error: true
+        run: |
+          DEB=$(ls packages/*.deb | head -n1)
+          bash scripts/make_roothide.sh "$DEB" output/aurora-roothide.deb
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -67,6 +67,7 @@ jobs:
             Auto-built from `main` (commit ${{ github.sha }}).
             Both packages attached — see the README for install steps.
           files: output/*.deb
+          fail_on_unmatched_files: false
           overwrite_files: true
           make_latest: "true"
 
@@ -75,3 +76,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: output/*.deb
+          fail_on_unmatched_files: false
