@@ -58,48 +58,61 @@ jobs:
         run: |
           mkdir -p site/debs
           cp output/*.deb site/debs/
+          # Serve raw files (no Jekyll processing) + give Sileo a source icon
+          echo "# disable Jekyll processing" > site/.nojekyll
+          cp banner.png site/RepoIcon.png 2>/dev/null || true
           if ! command -v dpkg-scanpackages >/dev/null 2>&1; then
             sudo apt-get update -qq
             sudo apt-get install -y -qq dpkg-dev
           fi
           cd site
           mkdir -p dists/stable/main/binary-iphoneos-arm
-          dpkg-scanpackages --multiversion debs /dev/null > dists/stable/main/binary-iphoneos-arm/Packages
-          gzip -9n -c dists/stable/main/binary-iphoneos-arm/Packages > dists/stable/main/binary-iphoneos-arm/Packages.gz
-          bzip2 -9c dists/stable/main/binary-iphoneos-arm/Packages > dists/stable/main/binary-iphoneos-arm/Packages.bz2
-          cd dists/stable
-          {
-            echo "Origin: Aurora"
-            echo "Label: Aurora"
-            echo "Suite: stable"
-            echo "Version: 1.0"
-            echo "Codename: stable"
-            echo "Architectures: iphoneos-arm"
-            echo "Components: main"
-            echo "Description: Aurora - the lock screen, reimagined"
-            echo "Date: $(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S UTC')"
-            echo ""
-            echo "MD5Sum:"
-            for f in main/binary-iphoneos-arm/Packages main/binary-iphoneos-arm/Packages.gz main/binary-iphoneos-arm/Packages.bz2; do
-              echo " $(md5sum "$f" | cut -d' ' -f1) $(stat -c%s "$f") $f"
-            done
-            echo "SHA1:"
-            for f in main/binary-iphoneos-arm/Packages main/binary-iphoneos-arm/Packages.gz main/binary-iphoneos-arm/Packages.bz2; do
-              echo " $(sha1sum "$f" | cut -d' ' -f1) $(stat -c%s "$f") $f"
-            done
-            echo "SHA256:"
-            for f in main/binary-iphoneos-arm/Packages main/binary-iphoneos-arm/Packages.gz main/binary-iphoneos-arm/Packages.bz2; do
-              echo " $(sha256sum "$f" | cut -d' ' -f1) $(stat -c%s "$f") $f"
-            done
-          } > Release
-          cd ../..
-          # Mirror metadata so EVERY suite style Sileo probes returns 200:
-          # "./" suite -> dists/Release + dists/main/..., flat repos -> root Packages*
-          cp dists/stable/Release dists/Release
+          dpkg-scanpackages --multiversion debs /dev/null > Packages
+          gzip -9n -c Packages > Packages.gz
+          bzip2 -9c Packages > Packages.bz2
+          cp Packages Packages.gz Packages.bz2 dists/stable/main/binary-iphoneos-arm/
           cp -r dists/stable/main dists/main
-          cp dists/stable/main/binary-iphoneos-arm/Packages Packages
-          cp dists/stable/main/binary-iphoneos-arm/Packages.gz Packages.gz
-          cp dists/stable/main/binary-iphoneos-arm/Packages.bz2 Packages.bz2
+          # gen_release SUITE PREFIX: emit ./Release (in the CURRENT dir) with
+          # checksums for Packages{,.gz,.bz2} located under PREFIX (relative to
+          # cwd). The caller must cd to the base dir the Release belongs to.
+          # PREFIX="" = FLAT repo layout at the site root, exactly like
+          # roothide.github.io. When Sileo adds a source it defaults to the
+          # "./" dist and fetches {url}/Release FIRST — a missing root Release
+          # was the cause of "Release returned status 404".
+          gen_release() {
+            local suite="$1" prefix="$2" f p algo h
+            {
+              echo "Origin: Aurora"
+              echo "Label: Aurora"
+              echo "Suite: $suite"
+              echo "Version: 1.0"
+              echo "Codename: aurora"
+              echo "Architectures: iphoneos-arm iphoneos-arm64 iphoneos-arm64e"
+              echo "Components: main"
+              echo "Description: Aurora - the lock screen, reimagined"
+              echo "Icon: https://randomdud7.github.io/aurora/RepoIcon.png"
+              echo "Date: $(LC_ALL=C date -u '+%a, %d %b %Y %H:%M:%S UTC')"
+              echo ""
+              for algo in MD5Sum SHA1 SHA256; do
+                echo "$algo:"
+                for f in Packages Packages.gz Packages.bz2; do
+                  p="${prefix:+$prefix/}$f"
+                  case "$algo" in
+                    MD5Sum) h=$(md5sum "$p" | cut -d' ' -f1) ;;
+                    SHA1) h=$(sha1sum "$p" | cut -d' ' -f1) ;;
+                    SHA256) h=$(sha256sum "$p" | cut -d' ' -f1) ;;
+                  esac
+                  echo " $h $(stat -c%s "$p") $p"
+                done
+              done
+            } > Release
+          }
+          # Root FLAT Release — Sileo's default "./" dist fetches {url}/Release
+          # first; this file was missing and caused "Release returned status 404".
+          gen_release flat ""
+          # Nested dists for tools that use a named suite explicitly
+          ( cd dists/stable && gen_release stable main/binary-iphoneos-arm )
+          ( cd dists && gen_release stable main/binary-iphoneos-arm )
           cd "$GITHUB_WORKSPACE"
           cat > site/index.html <<'HTML'
           <!doctype html>
