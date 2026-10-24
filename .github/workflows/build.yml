@@ -92,6 +92,7 @@ jobs:
               echo " $(sha256sum "$f" | cut -d' ' -f1) $(stat -c%s "$f") $f"
             done
           } > Release
+          cd ../..
           # Mirror metadata so EVERY suite style Sileo probes returns 200:
           # "./" suite -> dists/Release + dists/main/..., flat repos -> root Packages*
           cp dists/stable/Release dists/Release
